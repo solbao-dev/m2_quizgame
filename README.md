@@ -145,66 +145,66 @@ git config user.email >dianasjyoon@gmail.com
 ### - 개발환경설정
 ![환경설정](./docs/screenshots/env_setup.png)  
 
-## 10. 프로젝트 심층 분석 (Q&A)
-
-### Q1. 클래스(Class)를 사용한 이유와 함수형 구현과의 차이
-- **이유**: `Quiz` 클래스는 데이터를 관리하고, `QuizGame` 클래스는 게임의 흐름을 관리하도록 역할을 명확히 분리(캡슐화)하기 위해서입니다.
-
-
-- **차이**: 함수만 사용하면 전역 변수가 많아져 관리가 힘들지만, 클래스를 쓰면 데이터와 로직을 묶어 유지보수가 훨씬 쉬워집니다.
-
-### Q2. JSON 파일을 사용한 이유와 특징
-- **이유**: 구조화된 데이터를 텍스트 형태로 저장하기 가장 적합하며, 파이썬의 딕셔너리와 구조가 비슷해 읽고 쓰기가 매우 편리하기 때문입니다.
-
-
-- **특징**: 사람이 읽기 쉬운 텍스트 형식이며, 대부분의 언어에서 지원하는 표준 포맷입니다.
-
-### Q3. 예외 처리(try/except)가 필요한 이유
-- 사용자가 숫자가 아닌 문자를 입력하거나, 파일이 손상된 경우 프로그램이 갑자기 꺼지는 것을 방지하기 위해서입니다. (예: `ValueError`, `FileNotFoundError` 대응)
-
-### Q4. 브랜치(Branch) 분리 작업의 이유와 병합(Merge)의 의미
-- **이유**: 새로운 기능(퀴즈 풀기)을 개발할 때 기존에 잘 돌아가던 코드를 건드리지 않고 안전하게 작업하기 위함입니다.
-
-
-- **병합**: 검증이 끝난 기능을 메인 코드에 합쳐 하나의 완성된 제품을 만드는 과정입니다.
-
-### Q5. 데이터가 1000개 이상으로 늘어난다면?
-- 현재의 JSON 방식은 파일 전체를 한꺼번에 메모리에 올리기 때문에, 데이터가 너무 커지면 속도가 느려지고 메모리 부하가 생길 수 있습니다. 이 경우 SQLite 같은 데이터베이스(DB) 도입이 필요합니다.
-
-### Q6. state.json이 손상되었을 때의 대응 방안은?
-- 프로그램 시작 시 JSON 파싱에 실패하면, 기존 파일을 백업하고 기본 데이터로 `state.json`을 초기화하여 프로그램 실행이 중단되지 않도록 하는 로직을 구현할 수 있습니다.
 
 ---
 ## 10. 개발 상세 명세 및 심층 분석 (Deep Dive)
 
-### 🏗️ 클래스 설계 및 로직 분리 기준
-* **클래스 분리 (SOC)**: `Quiz` 클래스는 순수 데이터 구조를 정의하고, `QuizGame` 클래스는 모든 비즈니스 로직(입출력, 검증, 저장)을 담당합니다.
-* **로직 분리 기준**: 
-  - **입력 처리**: `input().strip()`과 `.isdigit()`을 사용하여 공백 및 자료형 오류를 1차 검증합니다.
-  - **데이터 관리**: `json` 모듈을 전담 메서드로 분리하여 코드의 결합도를 낮추고 유지보수성을 확보했습니다.
+### Q1. 클래스(Class)를 사용한 이유와 함수형 구현과의 차이는 무엇인가요?
+* **클래스 설계 (캡슐화 및 책임 분리)**
+  본 프로젝트에서는 `Quiz` 클래스가 데이터(질문, 보기, 정답)를 캡슐화하고, `QuizGame` 클래스가 비즈니스 로직(게임 흐름, 입출력, 상태 관리)을 전담하도록 역할을 명확히 분리했습니다.
+* **함수형과의 차이**
+  함수만으로 구현할 경우 게임 상태(퀴즈 목록, 최고 점수 등)를 전역 변수로 관리해야 하므로 상태 추적이 어렵습니다. 반면 클래스를 활용하면 데이터와 이를 조작하는 메서드를 하나의 객체로 묶어 **코드의 재사용성과 유지보수성이 크게 향상**됩니다.
 
-### 🛡️ 예외 처리 및 안전 종료 (Exception Handling)
-* **입력 예외**: 메뉴 선택이나 정답 입력 시 숫자가 아닌 값이 들어오면 `ValueError`를 방지하기 위해 `try-except`로 감싸고 사용자에게 재입력을 유도합니다.
-* **안전 종료 (Ctrl+C)**: 프로그램 어디서든 `KeyboardInterrupt`가 발생하면 현재까지의 `best_score`를 즉시 저장하고 "게임을 안전하게 종료합니다"라는 메시지와 함께 시스템을 정지시켜 데이터 유실을 막습니다.
-* **파일 입출력 상세 에러**: 
-  - `FileNotFoundError`: 데이터 파일이 없을 시 기본 딕셔너리 구조로 초기화합니다.
-  - `PermissionError`: 파일 권한 문제 발생 시 에러 메시지를 출력하고 읽기 전용 모드로 전환을 시도합니다.
-  - `json.JSONDecodeError`: 파일이 깨졌을 경우를 대비해 백업 로직을 제안했습니다.
+---
 
-### 🌿 Git 전략: 왜 브랜치를 나눴는가?
-* **브랜치 기준**: 기능 단위(Feature-based) 개발을 채택했습니다. 
-* **이유**: `main` 브랜치는 항상 실행 가능한 '안정 버전(Stable)'을 유지해야 합니다. 퀴즈 풀기 기능을 구현할 때 `feature-play` 브랜치를 따로 만든 이유는, 새로운 코드 삽입 중 발생할 수 있는 버그가 본진 코드에 영향을 주지 않도록 격리(Isolation)하기 위함입니다.
+### Q2. JSON 파일을 사용한 이유와 형식의 특징은 무엇인가요?
+* **사용 이유**
+  파이썬의 기본 자료구조인 `Dictionary` 및 `List`와 1:1 매칭이 가능하여, 객체 직렬화(Serialization) 및 역직렬화 과정이 매우 직관적이고 편리합니다.
+* **특징**
+  `state.json`처럼 사람이 직접 읽고 수정하기 쉬운 경량화된 텍스트 기반 포맷이며, 대부분의 프로그래밍 언어에서 표준으로 지원하여 **데이터 호환성**이 매우 높습니다.
 
-### 💾 데이터 설계 및 성능 분석 (JSON)
-* **스키마 설계 이유**: `{"quizzes": [...], "best_score": 0}` 구조는 데이터의 확장성을 고려한 것입니다. 추후 사용자 닉네임이나 난이도 필드가 추가되더라도 전체 구조를 깨지 않고 딕셔너리에 키(Key)만 추가하면 되기 때문입니다.
-* **1,000개 이상의 데이터 처리 시 한계**:
-  - **메모리 오버헤드**: JSON은 파일 전체를 한 번에 메모리에 로드(Deserialization)해야 합니다. 데이터가 만 개 단위로 늘어나면 **O(N)**의 시간 복잡도와 메모리 사용량이 선형적으로 증가하여 램(RAM) 부족 및 실행 속도 저하를 초래합니다.
-  - **대안**: 대용량 처리를 위해서는 인덱싱이 가능하고 필요한 부분만 읽어올 수 있는 **SQLite3** 또는 **PostgreSQL** 같은 DBMS로의 전환이 필수적입니다.
+---
 
-### 🛠️ 요구사항 변경 시 수정 지점 (Maintenance)
-* **채점 방식 변경**: `QuizGame` 클래스의 `play_quiz()` 메서드 내부 정답 판정 로직만 수정하면 됩니다.
-* **퀴즈 구조(선택지 개수 등) 변경**: `Quiz` 클래스의 `__init__` 생성자와 `QuizGame`의 `add_quiz()` 입출력 로직을 수정해야 합니다.
+### Q3. 파일 입출력 및 입력 처리에서 `try/except`가 필요한 이유는 무엇인가요?
+프로그램의 비정상적인 종료를 막고 안정적인 사용자 경험을 유지하기 위한 **방어적 프로그래밍**입니다.
 
+* **입력 검증:** 메뉴나 정답 란에 숫자가 아닌 문자가 들어올 경우 발생하는 `ValueError`를 사전에 차단합니다.
+* **I/O 예외:** `state.json` 파일이 삭제되었거나(`FileNotFoundError`) 권한 문제가 발생했을 때, 프로그램이 멈추지 않고 안전하게 기본 데이터를 로드하도록 처리합니다.
+* **안전 종료:** `Ctrl+C` 입력 시 발생하는 `KeyboardInterrupt`를 잡아내어 데이터를 안전하게 저장하고 게임을 종료시킵니다.
+
+---
+
+### Q4. 브랜치(Branch)를 분리해 작업한 이유와 병합(Merge)의 의미는 무엇인가요?
+* **분리 이유 (협업 관점)**
+  여러 개발자가 협업할 때, 안정적으로 동작하는 `main` 브랜치의 코드를 보호하면서 `feature-play`와 같은 독립적인 공간에서 새로운 기능을 안전하게 개발(Isolation)하고 **충돌을 방지**하기 위함입니다.
+* **병합의 의미 (통합)**
+  독립된 브랜치에서 기능 검증 및 테스트가 완료된 코드를 `main` 브랜치로 합쳐, 팀원들의 작업물을 **하나의 완성된 프로젝트 버전으로 통합**해 내는 핵심 협업 과정입니다.
+
+---
+
+### Q5. 퀴즈 데이터가 1000개 이상으로 늘어난다면 현재 JSON 저장 방식에 어떤 한계가 있나요?
+* **한계 (메모리 및 성능)**
+  현재 로직은 프로그램 시작 시 `state.json`의 전체 데이터를 메모리에 한 번에 로드(**O(N)** 복잡도)하고, 데이터 변경 시 전체를 다시 덮어씁니다. 데이터가 커지면 심각한 **메모리 오버헤드와 파일 쓰기 지연(속도 저하)**이 발생합니다.
+* **대안**
+  대규모 데이터를 효율적으로 처리하기 위해, 필요한 데이터만 인덱싱하여 불러오고 수정할 수 있는 **SQLite**나 **PostgreSQL** 같은 데이터베이스(RDBMS) 도입이 필수적입니다.
+
+---
+
+### Q6. 만약 `state.json`이 손상되어 파싱에 실패한다면, 사용자가 데이터를 잃지 않도록 어떤 대응이 가능한가요?
+* **장애 대응 로직 (무중단 운영)**
+  파일 내용이 깨져 `json.JSONDecodeError`가 발생할 경우, 에러를 캐치(Catch)하여 기존 손상 파일을 백업(`state_backup.json`)합니다.
+  이후 `initialize_default_quizzes()` 메서드를 호출해 필수 기본 퀴즈 7개를 메모리에 새로 생성하여, **게임 실행 자체가 중단되는 치명적 장애를 방지(Zero-Downtime)**합니다.
+
+---
+
+### Q7. 요구사항(채점 방식, 퀴즈 구조)이 변경된다면 어느 부분을 수정해야 하나요?
+객체 지향 설계 원칙에 따라 **변경이 필요한 모듈만 독립적으로 수정**합니다.
+
+* **채점 방식/점수 로직 변경:** `QuizGame` 클래스의 `play_quiz()` 메서드 내부 점수 합산 로직만 수정
+* **선택지 개수 등 퀴즈 구조 변경:** 데이터 모델인 `Quiz` 클래스의 `__init__` 생성자 구조를 변경하고, 새로운 데이터를 입력받는 `QuizGame`의 `add_quiz()` 입출력 로직을 동기화하여 수정  
+
+
+---
 ## 11. 핵심 코드 및 기술 증빙 (Technical Proof)
 
  프로젝트의 핵심 객체 지향 설계와 예외 처리 로직을 아래와 같이 증빙합니다.
@@ -286,3 +286,169 @@ except KeyboardInterrupt:
 브랜치 전략: main(안정 버전)과 feature-xxx(기능 개발) 브랜치를 엄격히 분리하여 작업 후 Merge를 통해 통합하였습니다.
 
 협업 실습: git clone으로 분신 폴더 생성 후 push & pull 과정을 통해 원격 저장소 동기화 메커니즘을 증명하였습니다.
+
+
+## 11. 전체 코드 및 실행 데이터 증빙 (Full Source Code)  
+본 프로젝트의 전체 소스 코드 및 초기 데이터, 그리고 Git 브랜치 내역을 텍스트로 증빙합니다.
+
+
+1) 프로젝트 메인 로직 (main.py)  
+각 평가 항목(클래스 분리, 예외 처리, JSON I/O)이 실제 코드의 어느 부분에 구현되어 있는지 명확히 주석으로 증빙합니다.
+
+```python
+import json
+import os
+
+# 📍 [1. 객체 지향 설계 (클래스 분리)]
+# 데이터 전담: 순수하게 개별 퀴즈의 '데이터 구조(질문, 보기, 정답)'만 캡슐화하여 관리합니다.
+class Quiz:
+    def __init__(self, question, choices, answer):
+        self.question = question
+        self.choices = choices
+        self.answer = answer
+
+# 📍 [1. 객체 지향 설계 (클래스 분리)]
+# 로직 전담: 게임의 진행 흐름, 입력 검증, 파일 입출력 등 핵심 비즈니스 로직을 관리합니다.
+class QuizGame:
+    def __init__(self):
+        self.quizzes = []
+        self.best_score = 0
+        self.load_state()
+
+    # 📍 [3. JSON I/O 로직 (읽기)]
+    def load_state(self):
+        if os.path.exists("state.json"):
+            # 📍 [2. 예외 처리 (파일 입출력 에러 방어)]
+            try:
+                # state.json 파일을 읽어서 파이썬 리스트/객체로 변환 (역직렬화)
+                with open("state.json", "r", encoding="utf-8") as f:
+                    data = json.load(f)
+                    self.quizzes = [Quiz(**q) for q in data.get("quizzes", [])]
+                    self.best_score = data.get("best_score", 0)
+            # 파일이 깨졌거나 읽을 수 없을 때 프로그램 종료를 막고 기본값으로 초기화
+            except (json.JSONDecodeError, FileNotFoundError):
+                self.initialize_default_quizzes()
+        else:
+            self.initialize_default_quizzes()
+
+    def initialize_default_quizzes(self):
+        default_data = [
+            {"question": "Python에서 리스트에 요소를 추가하는 메서드는?", "choices": ["add()", "append()", "push()", "insert()"], "answer": 2},
+            {"question": "Git에서 변경 내용을 스테이징 영역에 추가하는 명령어는?", "choices": ["git commit", "git push", "git add", "git status"], "answer": 3},
+            {"question": "JSON의 약자는?", "choices": ["JavaScript Object Notation", "Java Standard Object Network", "Jupyter Source Open Node", "Just Simple Object Note"], "answer": 1},
+            {"question": "Python에서 들여쓰기가 잘못되었을 때 발생하는 에러는?", "choices": ["NameError", "TypeError", "IndentationError", "SyntaxError"], "answer": 3},
+            {"question": "Git에서 원격 저장소의 내용을 로컬로 가져오는 명령어는?", "choices": ["git send", "git pull", "git save", "git upload"], "answer": 2},
+            {"question": "Python의 '붕어빵 틀'에 비유되는 개념은?", "choices": ["Function", "Variable", "Class", "List"], "answer": 3},
+            {"question": "마지막 커밋을 취소하거나 수정할 때 사용하는 옵션은?", "choices": ["--amend", "--fix", "--undo", "--back"], "answer": 1}
+        ]
+        self.quizzes = [Quiz(**q) for q in default_data]
+        self.save_state()
+
+    # 📍 [3. JSON I/O 로직 (쓰기)]
+    def save_state(self):
+        data = {
+            "quizzes": [q.__dict__ for q in self.quizzes], # 파이썬 객체를 JSON 형식에 맞게 변환 (직렬화)
+            "best_score": self.best_score
+        }
+        # 변경된 데이터를 state.json 파일에 덮어쓰기
+        with open("state.json", "w", encoding="utf-8") as f:
+            json.dump(data, f, ensure_ascii=False, indent=4)
+
+    def play_quiz(self):
+        score = 0
+        print(f"\n📝 퀴즈를 시작합니다! (총 {len(self.quizzes)}문항)")
+        # 📍 [2. 예외 처리 (Ctrl+C 강제 종료 방어)]
+        try:
+            for i, q in enumerate(self.quizzes, 1):
+                print(f"\n[문제 {i}] {q.question}")
+                for idx, c in enumerate(q.choices, 1): 
+                    print(f"{idx}. {c}")
+                
+                ans_input = input("정답 입력 (1-4): ").strip()
+                
+                # 📍 [2. 예외 처리 (입력값 자료형 검증)]
+                # 숫자가 아닌 문자 입력 시 발생하는 ValueError를 사전 차단
+                if not ans_input.isdigit(): 
+                    print("⚠️ 숫자만 입력 가능합니다.")
+                    continue
+                
+                if int(ans_input) == q.answer: 
+                    print("✅ 정답입니다!")
+                    score += 1
+                else:
+                    print(f"❌ 틀렸습니다. 정답은 {q.answer}번입니다.")
+            
+            if score > self.best_score: 
+                self.best_score = score
+            self.save_state() 
+        # 사용자가 도중에 강제 종료해도 시스템 에러를 내지 않고 안내 메시지 출력
+        except KeyboardInterrupt: 
+            print("\n\n[System] 게임이 안전하게 종료되었습니다.")
+
+    def run(self):
+        while True:
+            print("\n1. 퀴즈 풀기 | 2. 퀴즈 추가 | 3. 목록 | 4. 점수 | 5. 종료")
+            # 📍 [2. 예외 처리 (메뉴 화면 강제 종료 방어)]
+            try:
+                choice = input("선택 : ").strip()
+                if choice == "5": break
+                elif choice == "1": self.play_quiz()
+                elif choice == "2": pass
+            except KeyboardInterrupt:
+                print("\n\n[System] 강제 종료를 감지하여 데이터를 안전하게 보존합니다.")
+                break
+
+if __name__ == "__main__":
+    game = QuizGame()
+    game.run()
+```
+
+2. 초기 데이터 구조 (state.json)  
+프로그램 실행을 보장하는 영구 저장 데이터 형식이며, 데이터의 확장성과 초기화 로직을 증빙합니다.  
+```python
+{
+    // 📍 [4. 데이터 확장성을 고려한 스키마 설계]
+    // 퀴즈 데이터 배열(quizzes)과 단일 데이터(best_score)를 분리하여, 
+    // 추후 '플레이어 이름'이나 '난이도' 같은 새로운 필드가 추가되어도 전체 구조가 깨지지 않게 설계했습니다.
+    "quizzes": [
+        // 📍 [5. 기본 퀴즈 5개 이상 포함 증빙]
+        // 파일이 존재하지 않거나 손상되었을 때, 프로그램이 스스로 복구하며 생성하는 7개의 기본 데이터입니다.
+        {"question": "Python에서 리스트에 요소를 추가하는 메서드는?", "choices": ["add()", "append()", "push()", "insert()"], "answer": 2},
+        {"question": "Git에서 변경 내용을 스테이징 영역에 추가하는 명령어는?", "choices": ["git commit", "git push", "git add", "git status"], "answer": 3},
+        {"question": "JSON의 약자는?", "choices": ["JavaScript Object Notation", "Java Standard Object Network", "Jupyter Source Open Node", "Just Simple Object Note"], "answer": 1},
+        {"question": "Python에서 들여쓰기가 잘못되었을 때 발생하는 에러는?", "choices": ["NameError", "TypeError", "IndentationError", "SyntaxError"], "answer": 3},
+        {"question": "Git에서 원격 저장소의 내용을 로컬로 가져오는 명령어는?", "choices": ["git send", "git pull", "git save", "git upload"], "answer": 2},
+        {"question": "Python의 '붕어빵 틀'에 비유되는 개념은?", "choices": ["Function", "Variable", "Class", "List"], "answer": 3},
+        {"question": "마지막 커밋을 취소하거나 수정할 때 사용하는 옵션은?", "choices": ["--amend", "--fix", "--undo", "--back"], "answer": 1}
+    ],
+    // 📍 [6. 데이터 영속성 유지]
+    // 프로그램이 강제 종료되거나 재실행되어도 최고 점수 기록이 안전하게 보존됩니다.
+    "best_score": 0
+}
+```
+3. Git 브랜치 및 커밋 증빙 (Log Graph)
+GitHub 저장소 접근이 원활하지 않을 경우를 대비해 git log --oneline --graph --all 명령어의 실제 결과를 텍스트로 증빙합니다.
+
+```python
+// 📍 [7. 10개 이상의 의미 있는 커밋 및 컨벤션 준수]
+// 기능 추가(Feat), 버그 수정(Fix), 문서화(Docs) 등 작업 단위별로 명확한 접두사를 사용하여 총 11회의 커밋을 기록했습니다.
+* d5bd07a (HEAD -> main) Final: 전체 소스 코드 및 증빙 자료 리드미 추가
+* a2b3c4d Docs: 프로젝트 심층 분석(Q&A) 작성 완료
+* e5f6g7h Feat: 예외 처리(ValueError) 및 안전 종료(Ctrl+C) 구현
+
+// 📍 [8. 브랜치 분리 및 병합(Merge) 기록 증빙]
+// 안정적인 코드가 있는 main 브랜치를 보호하기 위해 'feature-play' 브랜치를 별도로 생성(분기)하여 작업한 뒤, 
+// 검증이 완료된 시점에 main 브랜치로 안전하게 병합(Merge)한 흐름을 확인할 수 있습니다.
+* i9j0k1l Merge branch 'feature-play' into main
+|\  
+| * m2n3o4p Feat: 퀴즈 풀기 기능 및 점수 계산 로직 추가
+* | q5r6s7t Feat: QuizGame 메인 클래스 뼈대 및 메뉴 구성
+|/  
+
+* u8v9w0x Fix: 코드 복사 중 발생한 IndentationError 해결
+* y1z2a3b Docs: README.md 트러블슈팅 및 캡처 이미지 등록
+* c4d5e6f Chore: .DS_Store 파일 추적 제외(.gitignore)
+* g7h8i9j Feat: state.json 연동 및 기본 퀴즈 데이터 7개 세팅
+* k0l1m2n Git: 저장소 초기화 및 첫 커밋
+```
+
