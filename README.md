@@ -204,3 +204,85 @@ git config user.email >dianasjyoon@gmail.com
 ### 🛠️ 요구사항 변경 시 수정 지점 (Maintenance)
 * **채점 방식 변경**: `QuizGame` 클래스의 `play_quiz()` 메서드 내부 정답 판정 로직만 수정하면 됩니다.
 * **퀴즈 구조(선택지 개수 등) 변경**: `Quiz` 클래스의 `__init__` 생성자와 `QuizGame`의 `add_quiz()` 입출력 로직을 수정해야 합니다.
+
+## 11. 핵심 코드 및 기술 증빙 (Technical Proof)
+
+ 프로젝트의 핵심 객체 지향 설계와 예외 처리 로직을 아래와 같이 증빙합니다.
+
+### 💻 1. 객체 지향 설계 (Class Responsibility)
+- **`Quiz` 클래스**: 캡슐화를 통해 질문, 선택지, 정답 데이터를 하나의 단위로 관리합니다.
+- **`QuizGame` 클래스**: 게임 흐름 제어 및 파일 입출력(I/O)을 담당하여 데이터와 로직을 분리했습니다.
+
+```python
+class Quiz:
+    def __init__(self, question, choices, answer):
+        self.question = question
+        self.choices = choices
+        self.answer = answer
+
+class QuizGame:
+    def __init__(self):
+        self.quizzes = []
+        self.best_score = 0
+        self.load_state()  # 초기화 시 데이터 로드
+```
+
+### 💾 2. 데이터 보존 및 파일 입출력 (File I/O & JSON)
+읽기(Load): FileNotFoundError 발생 시 기본 데이터를 생성하여 프로그램 중단을 방지합니다.
+
+쓰기(Save): 데이터 변경(퀴즈 추가, 점수 갱신) 시 즉시 state.json에 반영하여 영속성을 보장합니다.  
+
+```python
+def load_state(self):
+    try:
+        with open("state.json", "r", encoding="utf-8") as f:
+            data = json.load(f)
+            # JSON 데이터를 Quiz 객체 리스트로 변환 (역직렬화)
+            self.quizzes = [Quiz(**q) for q in data.get("quizzes", [])]
+            self.best_score = data.get("best_score", 0)
+    except (FileNotFoundError, json.JSONDecodeError):
+        self.initialize_default_quizzes() # 파일 부재 시 초기화 로직
+
+def save_state(self):
+    data = {
+        "quizzes": [q.__dict__ for q in self.quizzes], # 객체를 딕셔너리로 변환
+        "best_score": self.best_score
+    }
+    with open("state.json", "w", encoding="utf-8") as f:
+        json.dump(data, f, ensure_ascii=False, indent=4)
+```
+### 🛡️ 3. 견고한 입력 검증 및 예외 처리 (Input Validation)
+숫자 검증: isdigit()을 사용해 문자가 입력될 경우의 ValueError를 사전에 차단합니다.
+
+범위 검증: 메뉴 번호(1-5) 이외의 입력에 대해 '잘못된 입력' 메시지를 출력하고 메뉴로 리다이렉트합니다.  
+
+```python
+def main_menu(self):
+    while True:
+        print("\n1. 퀴즈 풀기 | 2. 퀴즈 추가 | 3. 목록 | 4. 점수 | 5. 종료")
+        choice = input("선택 : ").strip()
+        
+        if choice == "5": break
+        elif choice == "1": self.play_quiz()
+        # ... 중략 ...
+        else: print("⚠️ 1~5 사이의 숫자만 입력해주세요.")
+```
+### 🚫 4. 안전 종료 처리 (KeyboardInterrupt)
+
+```python
+Ctrl+C 발생 시 시스템의 강제 종료 에러를 가로채어, 안내 메시지와 함께 리소스를 정리하고 안전하게 종료합니다.
+
+try:
+    game = QuizGame()
+    game.run()
+except KeyboardInterrupt:
+    print("\n\n[System] 사용자에 의해 프로그램이 강제 종료되었습니다.")
+    print("[System] 현재까지의 진행 상황을 안전하게 보존합니다.")
+```
+
+### 🌿 5. Git 협업 및 버전 관리 증빙
+커밋 로그: Feat, Fix, Docs 등 컨벤션을 준수한 11회 이상의 커밋 완료.
+
+브랜치 전략: main(안정 버전)과 feature-xxx(기능 개발) 브랜치를 엄격히 분리하여 작업 후 Merge를 통해 통합하였습니다.
+
+협업 실습: git clone으로 분신 폴더 생성 후 push & pull 과정을 통해 원격 저장소 동기화 메커니즘을 증명하였습니다.
