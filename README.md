@@ -11,7 +11,16 @@
 
 ## 3. 실행 방법 (How to Run)
 
-이 프로그램을 실행하기 위해서는 Python이 설치되어 있어야 합니다.
+
+
+0) **개발환경설정**: 이 프로그램을 실행하기 위해서는 Python이 설치되어 있어야 합니다.  
+```bash
+Editor: Visual Studio Code (v1.112.0) ✨
+
+Python: Python 3.12.13
+
+Git: git version 2.53.0
+```
 
 1) **프로젝트 복제**: 터미널에서 아래 명령어를 입력하여 저장소를 복제합니다.  
 ```bash
@@ -117,7 +126,7 @@ git config user.email >dianasjyoon@gmail.com
    - 본진 폴더(`2nd_mission_quizgame`)에서 원격의 변경 사항을 `pull`로 땡겨와 데이터 동기화 성공
 3. **결과**: 이 과정을 통해 팀 프로젝트에서의 코드 공유 및 최신화 메커니즘을 이해함
 
-## 10. 실행 화면 스크린샷
+## 10. 실행화면 및 스크린샷
 ### - 메뉴 화면
 ![메뉴화면](./docs/screenshots/menu.png)
 
@@ -131,4 +140,7 @@ git config user.email >dianasjyoon@gmail.com
 ![점수](./docs/screenshots/score.png)
 
 ### - Git History (Log Graph)
-![깃로그](./docs/screenshots/git_log.png)
+![깃로그](./docs/screenshots/git_log.png)  
+
+### - 개발환경설정
+![환경설정](./docs/screenshots/env_setup.png)
