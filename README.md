@@ -31,8 +31,7 @@
 - **스키마 구조:**
   - `quizzes`: 개별 퀴즈 정보(`question`, `choices`, `answer`)가 딕셔너리 형태로 담긴 리스트 구조입니다.
   - `best_score`: 현재까지 사용자가 기록한 최고 정답 수를 나타내는 숫자(int) 데이터입니다.
-
-  ## 7. 트러블슈팅 (Troubleshooting)
+## 7. 트러블슈팅 (Troubleshooting)
 
 ### 🚨 문제 상황 (Issue)
 터미널에서 첫 번째 커밋(`git commit`)을 시도했을 때, 아래와 같은 Author identity unknown 안내 메시지가 발생하며 커밋이 진행되지 않음.
