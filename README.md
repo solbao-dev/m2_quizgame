@@ -53,4 +53,4 @@ git config --global user.email "dianasjyoon@gmail.com"
 git config user.name  >solbao-dev
 git config user.email >dianasjyoon@gmail.com
 ```
-
+- 클론 실습 완료! (2026-04-09)
